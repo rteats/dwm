@@ -1774,6 +1774,7 @@ drawbar(Monitor *m)
 	Bar *bar;
 
 	if (m->showbar)
+	#endif // BAR_FLEXWINTITLE_PATCH
 		for (bar = m->bar; bar; bar = bar->next)
 			drawbarwin(bar);
 }
@@ -2437,7 +2438,7 @@ manage(Window w, XWindowAttributes *wa)
 	#endif // MAXIMIZE_PATCH / EXRESIZE_PATCH
 
 	if (!c->isfloating)
-		c->isfloating = c->oldstate = trans != None || c->isfixed;
+		c->isfloating = c->oldstate = t || c->isfixed;
 	if (c->isfloating) {
 		XRaiseWindow(dpy, c->win);
 		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColFloat].pixel);
