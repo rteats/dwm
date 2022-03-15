@@ -1772,7 +1772,7 @@ void
 drawbar(Monitor *m)
 {
 	Bar *bar;
-
+        if BAR_FLEXWINTITLE_PATCH
 	if (m->showbar)
 	#endif // BAR_FLEXWINTITLE_PATCH
 		for (bar = m->bar; bar; bar = bar->next)
