@@ -129,6 +129,7 @@ static const char font[]                 = "monospace 10";
 #else
 static const char *fonts[]               = { 
   "monospace:pixelsize=10",
+  "Cozette",
   // "Material Design Icons Desktop:pixelsize=14"
 };
 #endif // BAR_PANGO_PATCH
