@@ -440,11 +440,11 @@ static const Rule rules[] = {
 	RULE(.wintype = WTYPE "UTILITY", .isfloating = 1)
 	RULE(.wintype = WTYPE "TOOLBAR", .isfloating = 1)
 	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
-	RULE(.instance = "Pavucontrol", .isfloating = 1)
+	/* RULE(.instance = "Pavucontrol", .isfloating = 1) */
 	// web tag
-	RULE(.instance = "chromium", .tags = 1 << 1)
-	RULE(.instance = "st", .tags = 1 << 0)
-	RULE(.instance = "gimp", .tags = 1 << 2)
+	/* RULE(.instance = "chromium", .tags = 1 << 1) */
+	/* RULE(.instance = "st", .tags = 1 << 0) */
+	/* RULE(.instance = "gimp", .tags = 1 << 2) */
 	#if SCRATCHPADS_PATCH
 	RULE(.instance = "spterm", .tags = SPTAG(0), .isfloating = 1)
 	#endif // SCRATCHPADS_PATCH
@@ -719,7 +719,7 @@ static const char *xkb_layouts[]  = {
 #endif // XKB_PATCH
 
 /* key definitions */
-#define MODKEY Mod4Mask
+#define MODKEY Mod1Mask
 #if COMBO_PATCH && SWAPTAGS_PATCH && TAGOTHERMONITOR_PATCH
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      comboview,      {.ui = 1 << TAG} }, \
@@ -1027,9 +1027,9 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_Escape,     togglenomodbuttons,     {0} },
 	#endif // NO_MOD_BUTTONS_PATCH
 	#if SCRATCHPADS_PATCH
-	{ MODKEY,                       XK_grave,      togglescratch,          {.ui = 0 } },
-	{ MODKEY|ControlMask,           XK_grave,      setscratch,             {.ui = 0 } },
-	{ MODKEY|ShiftMask,             XK_grave,      removescratch,          {.ui = 0 } },
+	{ MODKEY,                       XK_Escape,      togglescratch,          {.ui = 0 } },
+	{ MODKEY|ControlMask,           XK_Escape,      setscratch,             {.ui = 0 } },
+	{ MODKEY|ShiftMask,             XK_Escape,      removescratch,          {.ui = 0 } },
 	#endif // SCRATCHPADS_PATCH
 	#if UNFLOATVISIBLE_PATCH
 	{ MODKEY|Mod4Mask,              XK_space,      unfloatvisible,         {0} },
@@ -1112,26 +1112,26 @@ static Key keys[] = {
 	{ MODKEY|Mod4Mask,              XK_Left,       switchtag,              { .ui = SWITCHTAG_LEFT  | SWITCHTAG_TAG | SWITCHTAG_VIEW } },
 	#endif // BAR_TAGGRID_PATCH
 	#if MOVEPLACE_PATCH
-	{ MODKEY,                       XK_KP_7,       moveplace,              {.ui = WIN_NW }},   /* XK_KP_Home,  */
-	{ MODKEY,                       XK_KP_8,       moveplace,              {.ui = WIN_N  }},   /* XK_KP_Up,    */
-	{ MODKEY,                       XK_KP_9,       moveplace,              {.ui = WIN_NE }},   /* XK_KP_Prior, */
-	{ MODKEY,                       XK_KP_4,       moveplace,              {.ui = WIN_W  }},   /* XK_KP_Left,  */
-	{ MODKEY,                       XK_KP_5,       moveplace,              {.ui = WIN_C  }},   /* XK_KP_Begin, */
-	{ MODKEY,                       XK_KP_6,       moveplace,              {.ui = WIN_E  }},   /* XK_KP_Right, */
-	{ MODKEY,                       XK_KP_1,       moveplace,              {.ui = WIN_SW }},   /* XK_KP_End,   */
-	{ MODKEY,                       XK_KP_2,       moveplace,              {.ui = WIN_S  }},   /* XK_KP_Down,  */
-	{ MODKEY,                       XK_KP_3,       moveplace,              {.ui = WIN_SE }},   /* XK_KP_Next,  */
+	{ MODKEY|ShiftMask,                       XK_k,       moveplace,              {.ui = WIN_NW }},   /* XK_KP_Home,  */
+	//{ MODKEY|ShiftMask,                       XK_KP_8,       moveplace,              {.ui = WIN_N  }},   /* XK_KP_Up,    */
+	{ MODKEY|ShiftMask,                       XK_l,       moveplace,              {.ui = WIN_NE }},   /* XK_KP_Prior, */
+	//{ MODKEY|ShiftMask,                       XK_KP_4,       moveplace,              {.ui = WIN_W  }},   /* XK_KP_Left,  */
+	//{ MODKEY|ShiftMask,                       XK_KP_5,       moveplace,              {.ui = WIN_C  }},   /* XK_KP_Begin, */
+	//{ MODKEY|ShiftMask,                       XK_KP_6,       moveplace,              {.ui = WIN_E  }},   /* XK_KP_Right, */
+	{ MODKEY|ShiftMask,                       XK_h,       moveplace,              {.ui = WIN_SW }},   /* XK_KP_End,   */
+	//{ MODKEY|ShiftMask,                       XK_KP_2,       moveplace,              {.ui = WIN_S  }},   /* XK_KP_Down,  */
+	{ MODKEY|ShiftMask,                       XK_j,       moveplace,              {.ui = WIN_SE }},   /* XK_KP_Next,  */
 	#endif // MOVEPLACE_PATCH
 	#if EXRESIZE_PATCH
-	{ MODKEY,                       XK_KP_7,       explace,                {.ui = EX_NW }},   /* XK_KP_Home,  */
-	{ MODKEY,                       XK_KP_8,       explace,                {.ui = EX_N  }},   /* XK_KP_Up,    */
-	{ MODKEY,                       XK_KP_9,       explace,                {.ui = EX_NE }},   /* XK_KP_Prior, */
-	{ MODKEY,                       XK_KP_4,       explace,                {.ui = EX_W  }},   /* XK_KP_Left,  */
-	{ MODKEY,                       XK_KP_5,       explace,                {.ui = EX_C  }},   /* XK_KP_Begin, */
-	{ MODKEY,                       XK_KP_6,       explace,                {.ui = EX_E  }},   /* XK_KP_Right, */
-	{ MODKEY,                       XK_KP_1,       explace,                {.ui = EX_SW }},   /* XK_KP_End,   */
-	{ MODKEY,                       XK_KP_2,       explace,                {.ui = EX_S  }},   /* XK_KP_Down,  */
-	{ MODKEY,                       XK_KP_3,       explace,                {.ui = EX_SE }},   /* XK_KP_Next,  */
+	{ MODKEY,                       XK_k,       explace,                {.ui = EX_NW }},   /* XK_KP_Home,  */
+	//{ MODKEY,                       XK_KP_8,       explace,                {.ui = EX_N  }},   /* XK_KP_Up,    */
+	{ MODKEY,                       XK_l,       explace,                {.ui = EX_NE }},   /* XK_KP_Prior, */
+	//{ MODKEY,                       XK_KP_4,       explace,                {.ui = EX_W  }},   /* XK_KP_Left,  */
+	//{ MODKEY,                       XK_KP_5,       explace,                {.ui = EX_C  }},   /* XK_KP_Begin, */
+	//{ MODKEY,                       XK_KP_6,       explace,                {.ui = EX_E  }},   /* XK_KP_Right, */
+	{ MODKEY,                       XK_h,       explace,                {.ui = EX_SW }},   /* XK_KP_End,   */
+	//{ MODKEY,                       XK_KP_2,       explace,                {.ui = EX_S  }},   /* XK_KP_Down,  */
+	{ MODKEY,                       XK_j,       explace,                {.ui = EX_SE }},   /* XK_KP_Next,  */
 
 	{ MODKEY|ShiftMask,             XK_KP_8,       exresize,               {.v = (int []){   0,  25 }}},  /* XK_KP_Up,    */
 	{ MODKEY|ShiftMask,             XK_KP_2,       exresize,               {.v = (int []){   0, -25 }}},  /* XK_KP_Down,  */
@@ -1206,10 +1206,10 @@ static Key keys[] = {
 	{ MODKEY,                       XK_F2,         mpdchange,              {.i = +1} },
 	{ MODKEY,                       XK_Escape,     mpdcontrol,             {0} },
 	#endif // MPDCONTROL_PATCH
-	TAGKEYS(                        XK_1,                                  0)
-	TAGKEYS(                        XK_2,                                  1)
-	TAGKEYS(                        XK_3,                                  2)
-	TAGKEYS(                        XK_4,                                  3)
+	/* TAGKEYS(                        XK_1,                                  0) */
+	/* TAGKEYS(                        XK_2,                                  1) */
+	/* TAGKEYS(                        XK_3,                                  2) */
+	/* TAGKEYS(                        XK_4,                                  3) */
 	/* TAGKEYS(                        XK_5,                                  4) */
 	/* TAGKEYS(                        XK_6,                                  5) */
 	/* TAGKEYS(                        XK_7,                                  6) */

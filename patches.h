@@ -77,7 +77,7 @@
 #define BAR_LAYOUTMENU_PATCH 0
 
 /* Show layout symbol in bar */
-#define BAR_LTSYMBOL_PATCH 0
+#define BAR_LTSYMBOL_PATCH 1
 
 /* Adds powerline arrows for the status.
  * This uses statuscolors logic for choosing colors for the powerline. As these markers
@@ -523,7 +523,7 @@
 /* The cyclelayouts patch lets you cycle through all your layouts.
  * https://dwm.suckless.org/patches/cyclelayouts/
  */
-#define CYCLELAYOUTS_PATCH 1
+#define CYCLELAYOUTS_PATCH 0
 
 /* Make dwm respect _MOTIF_WM_HINTS property, and not draw borders around windows requesting
  * for it. Some applications use this property to notify window managers to not draw window
