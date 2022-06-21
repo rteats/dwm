@@ -22,6 +22,10 @@ Browsing patches? There is a [map of patches](https://coggle.it/diagram/X9IiSSM6
 
 ### Changelog:
 
+2022-06-20 - Added the renamed scratchpads patch
+
+2022-06-17 - Ported the seamless restart feature from dusk into dwm-flexipatch
+
 2022-02-11 - Added the isfreesize version of the sizehints patch and the [tagsync](https://github.com/bakkeby/dwm-flexipatch/pull/219) patch (contributed by [Bagelli](https://github.com/Bagellll))
 
 2021-11-23 - Added the taglabels and underlinetags patches
@@ -566,6 +570,9 @@ Browsing patches? There is a [map of patches](https://coggle.it/diagram/X9IiSSM6
    - [push](https://dwm.suckless.org/patches/push/)
       - this patch provides a way to move clients up and down inside the client list
 
+   - [renamed_scratchpads](https://github.com/bakkeby/patches/wiki/renamedscratchpads)
+      - variant of the [named scratchpads](https://dwm.suckless.org/patches/namedscratchpads/) patch
+
    - [reorganizetags](https://dwm.suckless.org/patches/reorganizetags/)
       - shifts all clients per tag to leftmost unoccupied tags
       - e.g. if clients A, B, C are tagged on tags 1, 5, 9 respectively, when reorganized they will
@@ -604,6 +611,9 @@ Browsing patches? There is a [map of patches](https://coggle.it/diagram/X9IiSSM6
    - [scratchpad_alt_1](https://github.com/GasparVardanyan/dwm-scratchpad)
       - this alternative patch enables a scratchpad feature in dwm similar to the scratchpad
         feature in i3wm
+
+   - seamless_restart
+      - allows for selected layout, assigned tags, etc. to be persisted across restarts
 
    - [selfrestart](https://dwm.suckless.org/patches/selfrestart/)
       - restart dwm without the unnecessary dependency of an external script

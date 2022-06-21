@@ -10,7 +10,7 @@ shiftviewclients(const Arg *arg)
 	for (selmon = mons; selmon; selmon = selmon->next)
 	#endif // TAGSYNC_PATCH
 	for (c = selmon->clients; c; c = c->next) {
-		#if SCRATCHPADS_PATCH
+		#if SCRATCHPADS_PATCH && !RENAMED_SCRATCHPADS_PATCH
 		if (!(c->tags & SPTAGMASK))
 			tagmask = tagmask | c->tags;
 		#elif SCRATCHPAD_ALT_1_PATCH
@@ -24,28 +24,23 @@ shiftviewclients(const Arg *arg)
 	selmon = origselmon;
 	#endif // TAGSYNC_PATCH
 
-	#if SCRATCHPADS_PATCH
+	#if SCRATCHPADS_PATCH && !RENAMED_SCRATCHPADS_PATCH
 	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 	#else
 	shifted.ui = selmon->tagset[selmon->seltags];
 	#endif // SCRATCHPADS_PATCH
-	if (arg->i > 0) { // left circular shift
-		do {
+
+	do {
+		if (arg->i > 0) // left circular shift
 			shifted.ui = (shifted.ui << arg->i)
 			   | (shifted.ui >> (NUMTAGS - arg->i));
-			#if SCRATCHPADS_PATCH
-			shifted.ui &= ~SPTAGMASK;
-			#endif // SCRATCHPADS_PATCH
-		} while (tagmask && !(shifted.ui & tagmask));
-	} else { // right circular shift
-		do {
-			shifted.ui = (shifted.ui >> (- arg->i)
-			   | shifted.ui << (NUMTAGS + arg->i));
-			#if SCRATCHPADS_PATCH
-			shifted.ui &= ~SPTAGMASK;
-			#endif // SCRATCHPADS_PATCH
-		} while (tagmask && !(shifted.ui & tagmask));
-	}
+		else // right circular shift
+			shifted.ui = (shifted.ui >> -arg->i)
+			   | (shifted.ui << (NUMTAGS + arg->i));
+		#if SCRATCHPADS_PATCH && !RENAMED_SCRATCHPADS_PATCH
+		shifted.ui &= ~SPTAGMASK;
+		#endif // SCRATCHPADS_PATCH
+	} while (tagmask && !(shifted.ui & tagmask));
 
 	view(&shifted);
 }

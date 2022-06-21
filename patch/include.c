@@ -97,7 +97,7 @@
 #if ASPECTRESIZE_PATCH
 #include "aspectresize.c"
 #endif
-#if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
+#if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH || SEAMLESS_RESTART_PATCH
 #include "attachx.c"
 #endif
 #if AUTOSTART_PATCH
@@ -218,7 +218,9 @@
 #if ROUNDED_CORNERS_PATCH
 #include "roundedcorners.c"
 #endif
-#if SCRATCHPADS_PATCH
+#if RENAMED_SCRATCHPADS_PATCH
+#include "renamed_scratchpads.c"
+#elif SCRATCHPADS_PATCH
 #include "scratchpad.c"
 #endif
 #if SCRATCHPAD_ALT_1_PATCH
@@ -312,6 +314,9 @@
 #endif
 #if DRAGMFACT_PATCH
 #include "dragmfact.c"
+#endif
+#if SEAMLESS_RESTART_PATCH
+#include "seamless_restart.c"
 #endif
 /* Layouts */
 #if BSTACK_LAYOUT || BSTACKHORIZ_LAYOUT || CENTEREDMASTER_LAYOUT || CENTEREDFLOATINGMASTER_LAYOUT || COLUMNS_LAYOUT || DECK_LAYOUT || TILE_LAYOUT

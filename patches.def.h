@@ -844,6 +844,18 @@
  */
 #define PUSH_NO_MASTER_PATCH 0
 
+/* Variant of the named scratchpads patch allowing scratch keys to be added or removed
+ * on demand, allowing multiple scratchpad windows to be toggled into and out of view
+ * in unison, as well as including multi-monitor support.
+ *
+ * https://github.com/bakkeby/patches/wiki/renamedscratchpads
+ */
+#define RENAMED_SCRATCHPADS_PATCH 0
+
+/* Renamed scratchpads option to auto-hide scratchpads when moving to a different tag.
+ * This behaviour is similar to that of the (multiple) scratchpads patch. */
+#define RENAMED_SCRATCHPADS_AUTO_HIDE_PATCH 0
+
 /* Shifts all clients per tag to leftmost unoccupied tags.
  *
  * For example, if clients A, B, C are tagged on tags 1, 5, 9 respectively, when
@@ -921,6 +933,18 @@
  * https://github.com/GasparVardanyan/dwm-scratchpad
  */
 #define SCRATCHPAD_ALT_1_PATCH 0
+
+/* This patch persists some settings across window manager restarts. These include but are not
+ * limited to:
+ *    - client's assigned tag(s) on which monitor
+ *    - the order of clients
+ *    - nmaster
+ *    - selected layout
+ *    - plus various additions depending on what other patches are used
+ *
+ * The above is not persisted across reboots, however.
+ */
+#define SEAMLESS_RESTART_PATCH 0
 
 /* As opposed to the original patch this only adds a rule option allowing fake fullscreen
  * to be enabled for applications when they start. This is intended to be used in combination
