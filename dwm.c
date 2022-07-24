@@ -314,6 +314,7 @@ typedef struct {
 	int (*widthfunc)(Bar *bar, BarArg *a);
 	int (*drawfunc)(Bar *bar, BarArg *a);
 	int (*clickfunc)(Bar *bar, Arg *arg, BarArg *a);
+	int (*hoverfunc)(Bar *bar, BarArg *a, XMotionEvent *ev);
 	char *name; // for debugging
 	int x, w; // position, width for internal use
 } BarRule;
@@ -515,6 +516,11 @@ struct Monitor {
 	Client *lastsel;
 	const Layout *lastlt;
 	#endif // IPC_PATCH
+	#if BAR_TAGPREVIEW_PATCH
+	Window tagwin;
+	int previewshow;
+	Pixmap tagmap[NUMTAGS];
+	#endif // BAR_TAGPREVIEW_PATCH
 };
 
 typedef struct {
@@ -1227,15 +1233,25 @@ checkotherwm(void)
 void
 cleanup(void)
 {
-	#if !SEAMLESS_RESTART_PATCH
-	Arg a = {.ui = ~0};
-	#endif // SEAMLESS_RESTART_PATCH
-	Layout foo = { "", NULL };
 	Monitor *m;
+	Layout foo = { "", NULL };
 	size_t i;
-	#if !SEAMLESS_RESTART_PATCH
-	view(&a);
+
+	#if SEAMLESS_RESTART_PATCH
+	for (m = mons; m; m = m->next)
+		persistmonitorstate(m);
 	#endif // SEAMLESS_RESTART_PATCH
+
+	#if COOL_AUTOSTART_PATCH
+	/* kill child processes */
+	for (i = 0; i < autostart_len; i++) {
+		if (0 < autostart_pids[i]) {
+			kill(autostart_pids[i], SIGTERM);
+			waitpid(autostart_pids[i], NULL, 0);
+		}
+	}
+	#endif // COOL_AUTOSTART_PATCH
+
 	selmon->lt[selmon->sellt] = &foo;
 	for (m = mons; m; m = m->next)
 		while (m->stack)
@@ -1308,6 +1324,13 @@ cleanupmon(Monitor *mon)
 	#if PERTAG_PATCH
 	free(mon->pertag);
 	#endif // PERTAG_PATCH
+	#if BAR_TAGPREVIEW_PATCH
+	for (size_t i = 0; i < NUMTAGS; i++)
+		if (mon->tagmap[i])
+			XFreePixmap(dpy, mon->tagmap[i]);
+	XUnmapWindow(dpy, mon->tagwin);
+	XDestroyWindow(dpy, mon->tagwin);
+	#endif // BAR_TAGPREVIEW_PATCH
 	free(mon);
 }
 
@@ -2620,10 +2643,21 @@ motionnotify(XEvent *e)
 {
 	static Monitor *mon = NULL;
 	Monitor *m;
+	Bar *bar;
 	#if LOSEFULLSCREEN_PATCH
 	Client *sel;
 	#endif // LOSEFULLSCREEN_PATCH
 	XMotionEvent *ev = &e->xmotion;
+
+	if ((bar = wintobar(ev->window))) {
+		barhover(e, bar);
+		return;
+	}
+
+	#if BAR_TAGPREVIEW_PATCH
+	if (selmon->previewshow != 0)
+		hidetagpreview(selmon);
+	#endif // BAR_TAGPREVIEW_PATCH
 
 	if (ev->window != root)
 		return;
@@ -2831,19 +2865,11 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
-	#if COOL_AUTOSTART_PATCH
-	size_t i;
-	#endif // COOL_AUTOSTART_PATCH
 	#if RESTARTSIG_PATCH
 	restart = arg->i;
 	#endif // RESTARTSIG_PATCH
-	#if SEAMLESS_RESTART_PATCH
-	Monitor *m;
-	#endif // SEAMLESS_RESTART_PATCH
 	#if ONLYQUITONEMPTY_PATCH
-	#if !SEAMLESS_RESTART_PATCH
 	Monitor *m;
-	#endif // SEAMLESS_RESTART_PATCH
 	Client *c;
 	unsigned int n = 0;
 
@@ -2862,21 +2888,6 @@ quit(const Arg *arg)
 	#else // !ONLYQUITONEMPTY_PATCH
 	running = 0;
 	#endif // ONLYQUITONEMPTY_PATCH
-
-	#if SEAMLESS_RESTART_PATCH
-	for (m = mons; m && !running; m = m->next)
-		persistmonitorstate(m);
-	#endif // SEAMLESS_RESTART_PATCH
-
-	#if COOL_AUTOSTART_PATCH
-	/* kill child processes */
-	for (i = 0; i < autostart_len && !running; i++) {
-		if (0 < autostart_pids[i]) {
-			kill(autostart_pids[i], SIGTERM);
-			waitpid(autostart_pids[i], NULL, 0);
-		}
-	}
-	#endif // COOL_AUTOSTART_PATCH
 }
 
 Monitor *
@@ -3731,6 +3742,9 @@ setup(void)
 
 	updatebars();
 	updatestatus();
+	#if BAR_TAGPREVIEW_PATCH
+	updatepreview();
+	#endif // BAR_TAGPREVIEW_PATCH
 
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
@@ -4197,6 +4211,9 @@ toggleview(const Arg *arg)
 	#if !EMPTYVIEW_PATCH
 	if (newtagset) {
 	#endif // EMPTYVIEW_PATCH
+		#if BAR_TAGPREVIEW_PATCH
+		tagpreviewswitchtag();
+		#endif // BAR_TAGPREVIEW_PATCH
 		selmon->tagset[selmon->seltags] = newtagset;
 
 		#if PERTAG_PATCH
@@ -4420,7 +4437,11 @@ updatebars(void)
 		#else
 		.background_pixmap = ParentRelative,
 		#endif // BAR_ALPHA_PATCH
+		#if BAR_TAGPREVIEW_PATCH
+		.event_mask = ButtonPressMask|ExposureMask|PointerMotionMask
+		#else
 		.event_mask = ButtonPressMask|ExposureMask
+		#endif // BAR_TAGPREVIEW_PATCH
 	};
 	XClassHint ch = {"dwm", "dwm"};
 	for (m = mons; m; m = m->next) {
@@ -4827,6 +4848,9 @@ view(const Arg *arg)
 		#endif // TOGGLETAG_PATCH
 		return;
 	}
+	#if BAR_TAGPREVIEW_PATCH
+	tagpreviewswitchtag();
+	#endif // BAR_TAGPREVIEW_PATCH
 	selmon->seltags ^= 1; /* toggle sel tagset */
 	#if PERTAG_PATCH
 	pertagview(arg);
