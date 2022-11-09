@@ -77,7 +77,7 @@
 #define BAR_LAYOUTMENU_PATCH 0
 
 /* Show layout symbol in bar */
-#define BAR_LTSYMBOL_PATCH 0
+#define BAR_LTSYMBOL_PATCH 1
 
 /* Adds powerline arrows for the status.
  * This uses statuscolors logic for choosing colors for the powerline. As these markers
@@ -114,6 +114,23 @@
  * https://dwm.suckless.org/patches/taggrid/
  */
 #define BAR_TAGGRID_PATCH 0
+
+/* Hover tag icons to see a preview of the windows on that tag.
+ *
+ * The patch depends on Imlib2 for icon scaling.
+ * You need to uncomment the corresponding line in config.mk to use the -lImlib2 library
+ *
+ * Arch Linux:
+ *     sudo pacman -S imlib2
+ * Debian:
+ *     sudo apt install libimlib2-dev
+ *
+ * As with the winicon patch you may want to consider adding the compiler flags of -O3 and
+ * -march=native to enable auto loop vectorize for better performance.
+ *
+ * https://dwm.suckless.org/patches/tag-previews/
+ */
+#define BAR_TAGPREVIEW_PATCH 0
 
 /* Show status in bar */
 #define BAR_STATUS_PATCH 1
@@ -153,7 +170,7 @@
 #define BAR_SYSTRAY_PATCH 0
 
 /* Show tag symbols in the bar. */
-#define BAR_TAGS_PATCH 0
+#define BAR_TAGS_PATCH 1
 
 /* Show tag symbols + class of master window in the bar.
  * https://dwm.suckless.org/patches/taglabels/
@@ -208,7 +225,7 @@
  * you need it.
  */
 #define BAR_TITLE_RIGHT_PAD_PATCH 0
-#define BAR_TITLE_LEFT_PAD_PATCH 0
+#define BAR_TITLE_LEFT_PAD_PATCH 1
 
 /**
  * Bar options
@@ -340,7 +357,7 @@
  * https://groups.google.com/forum/m/#!topic/wmii/7bncCahYIww
  * https://docs.google.com/viewer?a=v&pid=forums&srcid=MDAwODA2MTg0MDQyMjE0OTgzMzMBMDQ3ODQzODkyMTU3NTAyMTMxNTYBX2RUMVNtOUtDQUFKATAuMQEBdjI&authuser=0
  */
-#define BAR_IGNORE_XFT_ERRORS_WHEN_DRAWING_TEXT_PATCH 1
+#define BAR_IGNORE_XFT_ERRORS_WHEN_DRAWING_TEXT_PATCH 0
 
 /* This patch adds vertical and horizontal space between the statusbar and the edge of the screen.
  * https://dwm.suckless.org/patches/barpadding/
@@ -472,6 +489,18 @@
  * https://dwm.suckless.org/patches/autoresize/
  */
 #define AUTORESIZE_PATCH 0
+
+/* This patch adds proper support for Right-To-Left languages. (such as Farsi, Arabic or Hebrew).
+ *
+ * You need to uncomment the corresponding lines in config.mk to use the -lfribidi library
+ * when including this patch.
+ *
+ * This patch depends on the following additional library:
+ *    - fribidi
+ *
+ * https://dwm.suckless.org/patches/bidi/
+ */
+#define BIDI_PATCH 0
 
 /* This patch adds an iscentered rule to automatically center clients on the current monitor.
  * This patch takes precedence over centeredwindowname, alwayscenter and fancybar patches.
@@ -711,7 +740,7 @@
  * windows using keybindings.
  * https://dwm.suckless.org/patches/maximize/
  */
-#define MAXIMIZE_PATCH 1
+#define MAXIMIZE_PATCH 0
 
 /* Control Music Player Daemon via keybinds.
  * You need to uncomment the corresponding line in config.mk to use the -lmpdclient library
@@ -752,6 +781,32 @@
  * https://dwm.suckless.org/patches/movestack/
  */
 #define MOVESTACK_PATCH 0
+
+/* This patch allows you to change the names of tags during runtime.
+ *
+ * This is a bespoke version implemented specifically in relation to tagicons, which is integrated
+ * into dwm-flexipatch. By default it uses dmenu to retrieve the new name, but this can be
+ * customised via config along with the maximum text length and the format string.
+ *
+ * Special behaviour:
+ *    - if more than one tag is selected then the name change applies to all selected tags
+ *    - if tagicons is configured to have unique tags per monitor then the change only applies
+ *      for the current monitor
+ *    - the name change applies to the tag set that is active for the current tag:
+ *       * if used in combination with BAR_ALTTAGSDECORATION_PATCH and there are clients on the
+ *         given tag then the name change only applies to the ALT_TAGS_DECORATION tag set
+ *       * if used in combination with the BAR_ALTERNATIVE_TAGS_PATCH and alternative tags are
+ *         shown then the name change only applies to the ALTERNATIVE_TAGS tag set
+ *       * if used in combination with both then BAR_ALTTAGSDECORATION_PATCH takes precedence
+ *       * otherwise the name change applies to the DEFAULT_TAGS tag set
+ *
+ * https://dwm.suckless.org/patches/nametag/
+ */
+#define NAMETAG_PATCH 0
+
+/* Variant of the above which prepends the tag number to the given string.
+ * The toggle does nothing on its own and need to be enabled in combination with the above. */
+#define NAMETAG_PREPEND_PATCH 0
 
 /* Adds support for the _NET_CLIENT_LIST_STACKING atom, needed by certain applications like the
  * Zoom video conferencing application.
@@ -967,6 +1022,30 @@
  * https://dwm.suckless.org/patches/setborderpx/
  */
 #define SETBORDERPX_PATCH 0
+
+/* Combines shifttag and shiftview. Basically moves the window to the next/prev tag and follows it.
+ * Also see the focusadjacenttag patch.
+ * https://dwm.suckless.org/patches/shift-tools/
+ */
+#define SHIFTBOTH_PATCH 0
+
+/* Swaps all the clients on the current tag with all the client on the next/prev tag.
+ * Depends on the swaptags patch.
+ * https://dwm.suckless.org/patches/shift-tools/
+ */
+#define SHIFTSWAPTAGS_PATCH 0
+
+/* Moves the current selected client to the adjacent tag.
+ * Also see the focusadjacenttag patch.
+ * https://dwm.suckless.org/patches/shift-tools/
+ */
+#define SHIFTTAG_PATCH 0
+
+/* Moves the current selected client to the adjacent tag that has at least one client, if none
+ * then it acts as shifttag.
+ * https://dwm.suckless.org/patches/shift-tools/
+ */
+#define SHIFTTAGCLIENTS_PATCH 0
 
 /* This patch adds keybindings for left and right circular shift through tags.
  * https://github.com/chau-bao-long/dotfiles/blob/master/suckless/dwm/shiftview.diff
