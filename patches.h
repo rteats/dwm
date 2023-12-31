@@ -225,7 +225,7 @@
  * you need it.
  */
 #define BAR_TITLE_RIGHT_PAD_PATCH 0
-#define BAR_TITLE_LEFT_PAD_PATCH 1
+#define BAR_TITLE_LEFT_PAD_PATCH 0
 
 /**
  * Bar options
@@ -441,7 +441,7 @@
 /* Adds a window task switcher toggled using alt-tab.
  * https://dwm.suckless.org/patches/alt-tab/
  */
-#define ALT_TAB_PATCH 0
+#define ALT_TAB_PATCH 1
 
 /* All floating windows are centered, like the center patch, but without a rule.
  * The center patch takes precedence over this patch.
@@ -572,6 +572,18 @@
  */
 #define DISTRIBUTETAGS_PATCH 0
 
+/* By default dwm will terminate on color allocation failure and the behaviour is intended to
+ * catch and inform the user of color configuration issues.
+ *
+ * Some patches like status2d and xresources / xrdb can change colours during runtime, which
+ * means that if a color can't be allocated at this time then the window manager will abruptly
+ * terminate.
+ *
+ * This patch will ignore color allocation failures and continue on as normal. The effect of
+ * this is that the existing color, that was supposed to be replaced, will remain as-is.
+ */
+#define DO_NOT_DIE_ON_COLOR_ALLOCATION_FAILURE_PATCH 0
+
 /* Similarly to the dragmfact patch this allows you to click and drag clients to change the
  * cfact to adjust the client's size in the stack. This patch depends on the cfacts patch.
  */
@@ -646,10 +658,22 @@
  */
 #define FOCUSDIR_PATCH 0
 
+/* When changing tags, closing windows or moving clients out of view then focus will revert to the
+ * client window that remains under the mouse cursor rather than the most recently focused window.
+ * https://github.com/bakkeby/patches/wiki/focusfollowmouse
+ */
+#define FOCUSFOLLOWMOUSE_PATCH 0
+
 /* A simple patch that just puts focus back to the master client.
  * https://dwm.suckless.org/patches/focusmaster/
  */
 #define FOCUSMASTER_PATCH 0
+
+/* A variant of the focusmaster patch that additionally allows the focus to be returned to the
+ * previously focused client
+ * https://dwm.suckless.org/patches/focusmaster/
+ */
+#define FOCUSMASTER_RETURN_PATCH 0
 
 /* Switch focus only by mouse click and not sloppy (focus follows mouse pointer).
  * https://dwm.suckless.org/patches/focusonclick/
@@ -874,7 +898,7 @@
  */
 #define PERTAG_PATCH 0
 
-/* Option to store gaps on a per tag basis rather than on a per monitor basis.
+/* Option to enable gaps on a per tag basis rather than globally.
  * Depends on both pertag and vanitygaps patches being enabled.
  */
 #define PERTAG_VANITYGAPS_PATCH 0
@@ -1015,6 +1039,11 @@
  * https://dwm.suckless.org/patches/selfrestart/
  */
 #define SELFRESTART_PATCH 0
+
+/* Floating windows being sent to another monitor will be centered.
+ * https://dwm.suckless.org/patches/sendmoncenter/
+ */
+#define SENDMON_CENTER_PATCH 0
 
 /* This patch allow clients to keep focus when being sent to another monitor.
  * https://github.com/bakkeby/patches/blob/master/dwm/dwm-sendmon_keepfocus-6.2.diff
@@ -1255,6 +1284,11 @@
  */
 #define TOGGLEFULLSCREEN_PATCH 0
 
+/* This patch allows for the bar position (top or bottom) to be toggled during runtime.
+ * https://dwm.suckless.org/patches/toggletopbar/
+ */
+#define TOGGLETOPBAR_PATCH 0
+
 /* Minor patch that lets you use the same keyboard shortcut to toggle to the previous layout if the
  * designated layout is already active.
  *
@@ -1298,6 +1332,13 @@
  */
 #define UNFLOATVISIBLE_PATCH 0
 
+/* This patch adds a client rule that allows for windows that do not specify the override-redirect
+ * to not be managed by the window manager. This can be useful for external bars, widgets,
+ * launchers, docks, desktop icons and more.
+ * https://github.com/bakkeby/patches/wiki/unmanaged
+ */
+#define UNMANAGED_PATCH 0
+
 /* This patch adds configurable gaps between windows differentiating between outer, inner,
  * horizontal and vertical gaps.
  * https://github.com/bakkeby/patches/blob/master/dwm/dwm-vanitygaps-6.2.diff
@@ -1310,6 +1351,16 @@
  * fullscreen mode, hence this is enabled separately from the main vanitygaps patch.
  */
 #define VANITYGAPS_MONOCLE_PATCH 0
+
+/* By default MOD+Tab will take the user back to the previous tag only. If the user keeps
+ * using MOD+Tab then the view will switch back and forth between the current and previous tag.
+ * This patch allows dwm to keep a longer history of previous tag changes such that MOD+Tab can
+ * be pressed multiple times to go further back to earlier tag selections.
+ *
+ * The number of history elements is defined by the NUMVIEWHIST macro in dwm.c and defaults to
+ * the number of tags in the system.
+ */
+#define VIEW_HISTORY_PATCH 0
 
 /* Follow a window to the tag it is being moved to.
  * https://dwm.suckless.org/patches/viewontag/
