@@ -504,6 +504,9 @@ struct Monitor {
 	Client *clients;
 	Client *sel;
 	Client *stack;
+	#if FOCUSMASTER_RETURN_PATCH
+	Client *tagmarked[32];
+	#endif // FOCUSMASTER_RETURN_PATCH
 	Monitor *next;
 	Bar *bar;
 	const Layout *lt[2];
@@ -679,9 +682,7 @@ static void killclient(const Arg *arg);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
-#if !FOCUSONCLICK_PATCH
 static void motionnotify(XEvent *e);
-#endif // FOCUSONCLICK_PATCH
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
 #if !ZOOMSWAP_PATCH || TAGINTOSTACK_ALLMASTER_PATCH || TAGINTOSTACK_ONEMASTER_PATCH
@@ -817,9 +818,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	#endif // COMBO_PATCH / BAR_HOLDBAR_PATCH
 	[MappingNotify] = mappingnotify,
 	[MapRequest] = maprequest,
-	#if !FOCUSONCLICK_PATCH
 	[MotionNotify] = motionnotify,
-	#endif // FOCUSONCLICK_PATCH
 	[PropertyNotify] = propertynotify,
 	#if BAR_SYSTRAY_PATCH
 	[ResizeRequest] = resizerequest,
@@ -1822,6 +1821,11 @@ detach(Client *c)
 	#if SEAMLESS_RESTART_PATCH
 	c->idx = 0;
 	#endif // SEAMLESS_RESTART_PATCH
+	#if FOCUSMASTER_RETURN_PATCH
+	for (int i = 1; i < NUMTAGS; i++)
+		if (c == c->mon->tagmarked[i])
+			c->mon->tagmarked[i] = NULL;
+	#endif // FOCUSMASTER_RETURN_PATCH
 
 	for (tc = &c->mon->clients; *tc && *tc != c; tc = &(*tc)->next);
 	*tc = c->next;
@@ -2049,6 +2053,10 @@ focus(Client *c)
 	if (!c || !ISVISIBLE(c))
 		c = getpointerclient();
 	#endif // FOCUSFOLLOWMOUSE_PATCH
+	#if STICKY_PATCH
+	if (!c || !ISVISIBLE(c))
+		for (c = selmon->stack; c && (!ISVISIBLE(c) || c->issticky); c = c->snext);
+	#endif // STICKY_PATCH
 	if (!c || !ISVISIBLE(c))
 		for (c = selmon->stack; c && !ISVISIBLE(c); c = c->snext);
 	if (selmon->sel && selmon->sel != c)
@@ -2521,7 +2529,11 @@ manage(Window w, XWindowAttributes *wa)
 		updatewmhints(c);
 		if (!c->neverfocus)
 			XSetInputFocus(dpy, c->win, RevertToPointerRoot, CurrentTime);
+		#if BAR_SYSTRAY_PATCH
+		sendevent(c->win, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
+		#else
 		sendevent(c, wmatom[WMTakeFocus]);
+		#endif // BAR_SYSTRAY_PATCH
 
 		free(c);
 		unmanaged = 0;
@@ -2697,16 +2709,17 @@ maprequest(XEvent *e)
 		manage(ev->window, &wa);
 }
 
-#if !FOCUSONCLICK_PATCH
 void
 motionnotify(XEvent *e)
 {
+	#if !FOCUSONCLICK_PATCH
 	static Monitor *mon = NULL;
 	Monitor *m;
-	Bar *bar;
 	#if LOSEFULLSCREEN_PATCH
 	Client *sel;
 	#endif // LOSEFULLSCREEN_PATCH
+	#endif // FOCUSONCLICK_PATCH
+	Bar *bar;
 	XMotionEvent *ev = &e->xmotion;
 
 	if ((bar = wintobar(ev->window))) {
@@ -2719,6 +2732,7 @@ motionnotify(XEvent *e)
 		hidetagpreview(selmon);
 	#endif // BAR_TAGPREVIEW_PATCH
 
+	#if !FOCUSONCLICK_PATCH
 	if (ev->window != root)
 		return;
 	if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon && mon) {
@@ -2733,8 +2747,8 @@ motionnotify(XEvent *e)
 		focus(NULL);
 	}
 	mon = m;
+	#endif // FOCUSONCLICK_PATCH
 }
-#endif // FOCUSONCLICK_PATCH
 
 void
 movemouse(const Arg *arg)
@@ -2839,6 +2853,13 @@ nexttiled(Client *c)
 void
 pop(Client *c)
 {
+	#if FOCUSMASTER_RETURN_PATCH
+	int i;
+	for (i = 0; !(selmon->tagset[selmon->seltags] & 1 << i); i++);
+	i++;
+
+	c->mon->tagmarked[i] = nexttiled(c->mon->clients);
+	#endif // FOCUSMASTER_RETURN_PATCH
 	detach(c);
 	attach(c);
 	focus(c);
@@ -3361,6 +3382,14 @@ sendmon(Client *c, Monitor *m)
 	#else
 	c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
 	#endif // EMPTYVIEW_PATCH
+	#if SENDMON_CENTER_PATCH
+	c->x = m->mx + (m->mw - WIDTH(c)) / 2;
+	c->y = m->my + (m->mh - HEIGHT(c)) / 2;
+	#if SAVEFLOATS_PATCH
+	c->sfx = m->mx + (m->mw - c->sfw - 2 * c->bw) / 2;
+	c->sfy = m->my + (m->mh - c->sfh - 2 * c->bw) / 2;
+	#endif // SAVEFLOATS_PATCH
+	#endif // SENDMON_CENTER_PATCH
 	#if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
 	attachx(c);
 	#else
@@ -4370,13 +4399,24 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 	selmon->pertag->prevclient[selmon->pertag->curtag] = c;
 	#endif // SWAPFOCUS_PATCH
 	#if LOSEFULLSCREEN_PATCH
-	if (c->isfullscreen && ISVISIBLE(c) && c->mon == selmon && nextfocus && !nextfocus->isfloating)
+	if (c->isfullscreen && ISVISIBLE(c) && c->mon == selmon && nextfocus && !nextfocus->isfloating) {
+		#if RENAMED_SCRATCHPADS_PATCH && RENAMED_SCRATCHPADS_AUTO_HIDE_PATCH
+		#if FAKEFULLSCREEN_CLIENT_PATCH
+		if (c->scratchkey != 0 && c->fakefullscreen != 1)
+			togglescratch(&((Arg) {.v = (const char*[]){ &c->scratchkey, NULL } }));
+		#else
+		if (c->scratchkey != 0)
+			togglescratch(&((Arg) {.v = (const char*[]){ &c->scratchkey, NULL } }));
+		#endif // FAKEFULLSCREEN_CLIENT_PATCH
+		else
+		#endif // RENAMED_SCRATCHPADS_AUTO_HIDE_PATCH
 		#if FAKEFULLSCREEN_CLIENT_PATCH
 		if (c->fakefullscreen != 1)
 			setfullscreen(c, 0);
 		#else
 		setfullscreen(c, 0);
 		#endif // #if FAKEFULLSCREEN_CLIENT_PATCH
+	}
 	#endif // LOSEFULLSCREEN_PATCH
 	grabbuttons(c, 0);
 	#if !BAR_FLEXWINTITLE_PATCH
@@ -5068,6 +5108,9 @@ void
 zoom(const Arg *arg)
 {
 	Client *c = selmon->sel;
+	#if FOCUSMASTER_RETURN_PATCH && ZOOMSWAP_PATCH
+	int i;
+	#endif // FOCUSMASTER_RETURN_PATCH
 	if (arg && arg->v)
 		c = (Client*)arg->v;
 	if (!c)
@@ -5121,6 +5164,12 @@ zoom(const Arg *arg)
 	cold = nexttiled(c->mon->clients);
 	if (c != cold && !at)
 		at = findbefore(c);
+	#if FOCUSMASTER_RETURN_PATCH
+	for (i = 0; !(selmon->tagset[selmon->seltags] & 1 << i); i++);
+	i++;
+
+	c->mon->tagmarked[i] = cold;
+	#endif // FOCUSMASTER_RETURN_PATCH
 	detach(c);
 	attach(c);
 	/* swap windows instead of pushing the previous one down */
