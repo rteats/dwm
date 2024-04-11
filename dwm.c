@@ -482,6 +482,9 @@ struct Monitor {
 	int gappiv;           /* vertical gap between windows */
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
+	#if PERMON_VANITYGAPS_PATCH
+	int enablegaps;       /* whether gaps are enabled  */
+	#endif // PERMON_VANITYGAPS_PATCH
 	#endif // VANITYGAPS_PATCH
 	#if SETBORDERPX_PATCH
 	int borderpx;
@@ -1105,6 +1108,11 @@ arrange(Monitor *m)
 void
 arrangemon(Monitor *m)
 {
+	#if BAR_PADDING_SMART_PATCH
+	updatebarpos(selmon);
+	for (Bar *bar = selmon->bar; bar; bar = bar->next)
+		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
+	#endif // BAR_PADDING_SMART_PATCH
 	#if TAB_PATCH
 	updatebarpos(m);
 	XMoveResizeWindow(dpy, m->tabwin, m->wx, m->ty, m->ww, th);
@@ -1768,6 +1776,10 @@ createmon(void)
 		#endif // PERTAG_VANITYGAPS_PATCH | VANITYGAPS_PATCH
 	}
 	#endif // PERTAG_PATCH
+
+	#if PERMON_VANITYGAPS_PATCH
+	m->enablegaps = 1;
+	#endif // PERMON_VANITYGAPS_PATCH
 
 	#if SEAMLESS_RESTART_PATCH
 	restoremonitorstate(m);
@@ -4650,16 +4662,36 @@ updatebarpos(Monitor *m)
 	#if BAR_PADDING_VANITYGAPS_PATCH && VANITYGAPS_PATCH
 	#if PERTAG_VANITYGAPS_PATCH && PERTAG_PATCH
 	if (!selmon || selmon->pertag->enablegaps[selmon->pertag->curtag])
+	#elif PERMON_VANITYGAPS_PATCH
+	if (!selmon || selmon->enablegaps)
 	#else
 	if (enablegaps)
 	#endif // PERTAG_VANITYGAPS_PATCH
 	{
+		#if BAR_PADDING_SMART_PATCH
+		unsigned int n; Client *c;
+		for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+		if (n > 1) {
+			y_pad = gappoh;
+			x_pad = gappov;
+		}
+		#else
 		y_pad = gappoh;
 		x_pad = gappov;
+		#endif // BAR_PADDING_SMART_PATCH
 	}
 	#elif BAR_PADDING_PATCH
+	#if BAR_PADDING_SMART_PATCH
+	unsigned int n; Client *c;
+	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+	if (n > 1) {
+		y_pad = vertpad;
+		x_pad = sidepad;
+	}
+	#else
 	y_pad = vertpad;
 	x_pad = sidepad;
+	#endif // BAR_PADDING_SMART_PATCH
 	#endif // BAR_PADDING_PATCH | BAR_PADDING_VANITYGAPS_PATCH
 
 	#if INSETS_PATCH
