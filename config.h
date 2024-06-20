@@ -869,7 +869,7 @@ static const char *dmenucmd[] = {
 	#endif // BAR_DMENUMATCHTOP_PATCH
 	NULL
 };
-static const char *termcmd[]  = { "st", NULL };
+static const char *termcmd[]  = { "alacritty", NULL };
 
 #if BAR_STATUSCMD_PATCH
 #if BAR_DWMBLOCKS_PATCH
@@ -1285,7 +1285,7 @@ static const Key keys[] = {
 	#endif // SETBORDERPX_PATCH
 	#if CYCLELAYOUTS_PATCH
 	// { MODKEY|ControlMask,           XK_comma,      cyclelayout,            {.i = -1 } },
-	{ MODKEY,           XK_f,      cyclelayout,            {.i = -1 } },
+	{ MODKEY,           XK_n,      cyclelayout,            {.i = -1 } },
 	// { MODKEY|ControlMask,           XK_period,     cyclelayout,            {.i = +1 } },
 	#endif // CYCLELAYOUTS_PATCH
 	#if MPDCONTROL_PATCH
